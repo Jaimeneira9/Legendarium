@@ -34,6 +34,9 @@ Legendarium es una aplicación móvil multiplataforma diseñada para el seguimie
 3. Configura tu `.env` basándote en `.env.example`.
 4. Ejecuta: `npx expo start`.
 
+> [!IMPORTANT]
+> **Uso actual:** Para probar la aplicación en un dispositivo físico, se requiere el uso de **Expo Go** (iOS) o generar una **APK** mediante `eas build` (Android).
+
 ## 🎨 Guía de Diseño
 El proyecto sigue estrictamente un sistema de diseño definido:
 - **Fondo:** Parchment (`#f5f4ed`).
