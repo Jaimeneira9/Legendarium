@@ -27,3 +27,4 @@ node_modules/
 
 # Documentación interna (raíz)
 /*.md
+!/README.md
