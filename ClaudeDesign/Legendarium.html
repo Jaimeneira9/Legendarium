@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Legendarium</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 400ms ease, color 400ms ease;
+  }
+  body[data-theme="light"] { background: #ece9dc; color: #141413; }
+  body[data-theme="dark"]  { background: #0f0e0a; color: #f2ecdb; }
+  *, *::before, *::after { box-sizing: border-box; }
+  button { font: inherit; }
+  ::-webkit-scrollbar { display: none; }
+  .screen-scroll::-webkit-scrollbar { display: none; }
+  
+  .stage {
+    min-height: 100vh;
+    padding: 48px 32px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+    transition: background 400ms ease;
+  }
+  [data-theme="light"] .stage {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(201, 100, 66, 0.04) 0%, transparent 50%),
+      linear-gradient(180deg, #ece9dc 0%, #e3dfcf 100%);
+  }
+  [data-theme="dark"] .stage {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(224, 122, 82, 0.06) 0%, transparent 55%),
+      linear-gradient(180deg, #0f0e0a 0%, #0a0907 100%);
+  }
+  
+  .masthead {
+    width: 100%; max-width: 960px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 28px; margin-bottom: 36px;
+    transition: box-shadow 400ms ease;
+  }
+  [data-theme="light"] .masthead { box-shadow: inset 0 -1px 0 rgba(20,20,19,0.08); }
+  [data-theme="dark"]  .masthead { box-shadow: inset 0 -1px 0 rgba(242,236,219,0.10); }
+  
+  .masthead .brand {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 26px; font-weight: 500; letter-spacing: -0.4px;
+  }
+  .masthead .brand .amp { font-style: italic; font-weight: 400; }
+  [data-theme="light"] .masthead .brand .amp { color: #c96442; }
+  [data-theme="dark"]  .masthead .brand .amp { color: #e07a52; }
+  .masthead .meta {
+    font-family: Inter, system-ui; font-size: 11px;
+    letter-spacing: 1.4px; text-transform: uppercase;
+    color: #8a8478;
+  }
+</style>
+</head>
+<body data-theme="light">
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="components/icons.jsx"></script>
+<script type="text/babel" src="components/data.jsx"></script>
+<script type="text/babel" src="components/theme.jsx"></script>
+<script type="text/babel" src="components/covers.jsx"></script>
+<script type="text/babel" src="components/habit-card.jsx"></script>
+<script type="text/babel" src="components/habits-screen.jsx"></script>
+<script type="text/babel" src="components/books-screen.jsx"></script>
+<script type="text/babel" src="components/films-screen.jsx"></script>
+<script type="text/babel" src="components/book-detail.jsx"></script>
+<script type="text/babel" src="components/film-detail.jsx"></script>
+<script type="text/babel" src="components/shell.jsx"></script>
+<script type="text/babel" src="components/tweaks.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "startingTab": "habits",
+  "translucentTab": true,
+  "dark": true
+}/*EDITMODE-END*/;
+
+function App() {
+  const persistedTab = (() => {
+    try { return localStorage.getItem('legendarium.tab') || TWEAK_DEFAULTS.startingTab; }
+    catch { return TWEAK_DEFAULTS.startingTab; }
+  })();
+  
+  const [active, setActiveState] = React.useState(persistedTab);
+  const [tweaks, setTweaks] = React.useState({
+    translucentTab: TWEAK_DEFAULTS.translucentTab,
+    dark: TWEAK_DEFAULTS.dark,
+  });
+  const [editMode, setEditMode] = React.useState(false);
+  
+  const setActive = (t) => {
+    setActiveState(t);
+    try { localStorage.setItem('legendarium.tab', t); } catch {}
+  };
+  
+  // Reflect dark mode on <body>
+  React.useEffect(() => {
+    document.body.dataset.theme = tweaks.dark ? 'dark' : 'light';
+  }, [tweaks.dark]);
+  
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const d = e.data || {};
+      if (d.type === '__activate_edit_mode')   setEditMode(true);
+      if (d.type === '__deactivate_edit_mode') setEditMode(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+  
+  const updateTweaks = (next) => {
+    setTweaks(next);
+    window.parent.postMessage({
+      type: '__edit_mode_set_keys',
+      edits: { translucentTab: next.translucentTab, dark: next.dark },
+    }, '*');
+  };
+  
+  React.useEffect(() => {
+    const order = ['habits', 'books', 'films'];
+    const onKey = (e) => {
+      const i = order.indexOf(active);
+      if (e.key === 'ArrowRight') setActive(order[(i + 1) % 3]);
+      if (e.key === 'ArrowLeft')  setActive(order[(i + 2) % 3]);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [active]);
+  
+  const dateLine = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+  });
+  
+  const captionColor = tweaks.dark ? '#8a8478' : '#8a8478';
+  
+  return (
+    <div className="stage">
+      <div className="masthead">
+        <div className="brand">Legendarium <span className="amp">&</span> Co.</div>
+        <div className="meta">{dateLine} · Vol. iv</div>
+      </div>
+      
+      <PhoneShell tweaks={tweaks} active={active} setActive={setActive} dark={tweaks.dark}/>
+      
+      <div style={{
+        marginTop: 36, maxWidth: 420, textAlign: 'center',
+        fontFamily: '"Source Serif 4", Georgia, serif',
+        fontSize: 14, fontStyle: 'italic', color: captionColor,
+        lineHeight: 1.6, letterSpacing: 0.1,
+      }}>
+        {tweaks.dark
+          ? 'A reading room after hours — books, films and the small daily rituals, rendered in midnight and ember.'
+          : 'A reading room for books, films and the small daily rituals that make a life — rendered in pergamino, bound in terracotta.'}
+      </div>
+      
+      <div style={{
+        marginTop: 18,
+        fontFamily: 'Inter, system-ui', fontSize: 10.5,
+        color: tweaks.dark ? '#6b6558' : '#a8a296',
+        letterSpacing: 1.5, textTransform: 'uppercase',
+      }}>
+        Tap the tabs · or press ← →
+      </div>
+      
+      <TweaksPanel
+        open={editMode}
+        tweaks={tweaks}
+        setTweaks={updateTweaks}
+        active={active}
+        setActive={setActive}
+      />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+window.postMessage({ slideIndexChanged: 0 }, '*');
+</script>
+</body>
+</html>

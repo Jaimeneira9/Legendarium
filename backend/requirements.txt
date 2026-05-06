@@ -1,0 +1,10 @@
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+httpx==0.28.*
+pydantic==2.*
+pydantic-settings==2.*
+python-dotenv==1.*
+supabase==2.*
+gotrue==2.*
+postgrest>=1.0,<1.2
+slowapi==0.1.9

@@ -1,0 +1,29 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Variables de entorno (¡NUNCA subir!)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (mobile)
+node_modules/
+.expo/
+
+# Documentación interna (raíz)
+/*.md
